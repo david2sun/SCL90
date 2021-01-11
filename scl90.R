@@ -12,14 +12,14 @@ c(mean(df$total_scores), sd(df$total_scores)) # 均数和标准差
 # T = (Z x 10) + 50
 df$GSI_Tscore <- scale(df$total_scores) * 10 + 50
 mean(scale(df$total_scores))
-sum(df$GSI_Tscore >= 63)
-mean(df$GSI_Tscore >= 63)
-library(samplingbook)
-Sprop(df$GSI_Tscore >= 63, N=23690) ## 样本率估计
-# df$group[df$GSI_Tscore >= 63] <- "high risk"
-# df$group[df$GSI_Tscore < 63] <- "low risk"
-df$group[df$GSI_Tscore >= 63] <- 1
-df$group[df$GSI_Tscore < 63] <- 0
+# sum(df$GSI_Tscore >= 63)
+# mean(df$GSI_Tscore >= 63)
+# library(samplingbook)
+# Sprop(df$GSI_Tscore >= 63, N=23690) ## 样本率估计
+# # df$group[df$GSI_Tscore >= 63] <- "high risk"
+# # df$group[df$GSI_Tscore < 63] <- "low risk"
+# df$group[df$GSI_Tscore >= 63] <- 1
+# df$group[df$GSI_Tscore < 63] <- 0
 # 阳性项目数 Positive Symptom Total (PST)
 df$pos_items <- apply(as.matrix(df[,18:107]) > 1, MARGIN = 1, sum)
 c(mean = mean(df$pos_items[df$pos_items > 0]), sd = sd(df$pos_items[df$pos_items > 0]), median = median(df$pos_items[df$pos_items > 0])) 
@@ -163,88 +163,88 @@ round(100 * prop.table(tbl, margin = 1), 2)
 chisq.test(tbl)
 
 # 不同年龄组GSI T-scores比较
-table(df$age.group)
-library(reshape)
-stasfun <- function(x) c(n = length(x), mean = mean(x), sd = sd(x), median = median(x))
-df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
-       cast(., age.group ~ ., stasfun) %>%
-       dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
-df %>% melt(., measure.vars = c("total_scores")) %>%
-  cast(., age.group ~ ., stasfun) %>%
-  dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2))
-# 方差分析
-library(car)
-qqPlot(GSI_Tscore ~ age.group, data = df) #正态性评估
-# qqPlot(lm(GSI_Tscore ~ age.group, data = df)) 方差分析的正态性假设检验
-library(nortest)
-lillie.test(df$GSI_Tscore)  # (Kolmogorov-Smirnov) normality test
-# 基于分组的正态性检验
-nor.test <- function(x) {
-  result <- shapiro.test(x)
-  c(W = round(result$statistic, 4), p = round(result$p.value, 4))
-}
-aggregate(GSI_Tscore ~ age.group, data = df, FUN = nor.test)
-
-
-
-# 提示不具有正态性
-car::leveneTest(lm(GSI_Tscore ~ age.group, data = df)) #方差齐性检验
-# 提示方差不齐
-# Welch ANOVA（方差不齐时使用）
-# oneway.test(GSI_Tscore ~ age.group, data = df)
-# 多组的非参数检验（成组设计的秩和检验）
-kruskal.test(GSI_Tscore ~ age.group, data = df)
-# 多组两两比较
-source("http://www.statmethods.net/RiA/wmc.txt")
-wmc(GSI_Tscore ~ age.group, data = df, method = "holm")
-# 不同性别GSI T-scores比较
-df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
-  cast(., X3.您的性别. ~ ., stasfun) %>%
-  dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
-prop.table(table(df$X3.您的性别.)) # 比例
-qqPlot(GSI_Tscore ~ X3.您的性别., data = df) # 正态性评估
-## 结果提示非正态性
-wilcox.test(GSI_Tscore ~ X3.您的性别., data = df) # stats包函数
-coin::wilcox_test(GSI_Tscore ~ factor(X3.您的性别.), data = df)
-# W = 2631874, p-value < 2.2e-16
-# 不同婚姻状况GSI T-scores比较
-df$X5.您的婚姻状况. <- ifelse(df$X5.您的婚姻状况. == 2, df$X5.您的婚姻状况., 1) # 两分类
-df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
-  cast(., X5.您的婚姻状况. ~ ., stasfun) %>%
-  dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
-round(100*prop.table(table(df$X5.您的婚姻状况.)), 2)
-coin::wilcox_test(GSI_Tscore ~ factor(X5.您的婚姻状况.), data = df)
-wilcox.test(GSI_Tscore ~ X5.您的婚姻状况., data = df) # 两样本
-kruskal.test(GSI_Tscore ~ X5.您的婚姻状况., data = df) # 多样本总体检验
-# Kruskal-Wallis chi-squared = 3.8845, df = 3, p-value = 0.2742
-wmc(GSI_Tscore ~ X5.您的婚姻状况., data = df, method = "holm") ##两两比较
-# 不同受教育程度GSI T-scores比较
-df$X6.您的受教育程度.[df$X6.您的受教育程度. == 1] <- 2 # 合并高中
-df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
-  cast(., X6.您的受教育程度. ~ ., stasfun) %>%
-  dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
-round(100*prop.table(table(df$X6.您的受教育程度.)), 2)
-kruskal.test(GSI_Tscore ~ X6.您的受教育程度., data = df) 
-# Kruskal-Wallis chi-squared = 13.73, df = 3, p-value = 0.003297
-wmc(GSI_Tscore ~ X6.您的受教育程度., data = df, method = "holm")
-# 不同工作年限GSI T-score比较
-df$work.years <- cut(df$X8.您的工作年限.年..不满1年按1年算., 
-                     breaks = c(0,5,10,20,60), right = F)
-df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
-  cast(., work.years ~ ., stasfun) %>%
-  dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
-round(100*prop.table(table(df$work.years)), 2)
-kruskal.test(GSI_Tscore ~ work.years, data = df) 
-# Kruskal-Wallis chi-squared = 16.373, df = 3, p-value =
-#   0.0009508
-wmc(GSI_Tscore ~ work.years, data = df, method = "holm") ##两两比较
-# 不同COVID-19工作经历GSI T-score比较
-df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
-  cast(., X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等. ~ ., stasfun) %>%
-  dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
-round(100*prop.table(table(df$X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等.)), 2)
-wilcox.test(GSI_Tscore ~ X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等., data = df)
-coin::wilcox_test(GSI_Tscore ~ factor(X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等.), data = df)
+# table(df$age.group)
+# library(reshape)
+# stasfun <- function(x) c(n = length(x), mean = mean(x), sd = sd(x), median = median(x))
+# df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
+#        cast(., age.group ~ ., stasfun) %>%
+#        dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
+# df %>% melt(., measure.vars = c("total_scores")) %>%
+#   cast(., age.group ~ ., stasfun) %>%
+#   dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2))
+# # 方差分析
+# library(car)
+# qqPlot(GSI_Tscore ~ age.group, data = df) #正态性评估
+# # qqPlot(lm(GSI_Tscore ~ age.group, data = df)) 方差分析的正态性假设检验
+# library(nortest)
+# lillie.test(df$GSI_Tscore)  # (Kolmogorov-Smirnov) normality test
+# # 基于分组的正态性检验
+# nor.test <- function(x) {
+#   result <- shapiro.test(x)
+#   c(W = round(result$statistic, 4), p = round(result$p.value, 4))
+# }
+# aggregate(GSI_Tscore ~ age.group, data = df, FUN = nor.test)
+# 
+# 
+# 
+# # 提示不具有正态性
+# car::leveneTest(lm(GSI_Tscore ~ age.group, data = df)) #方差齐性检验
+# # 提示方差不齐
+# # Welch ANOVA（方差不齐时使用）
+# # oneway.test(GSI_Tscore ~ age.group, data = df)
+# # 多组的非参数检验（成组设计的秩和检验）
+# kruskal.test(GSI_Tscore ~ age.group, data = df)
+# # 多组两两比较
+# source("http://www.statmethods.net/RiA/wmc.txt")
+# wmc(GSI_Tscore ~ age.group, data = df, method = "holm")
+# # 不同性别GSI T-scores比较
+# df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
+#   cast(., X3.您的性别. ~ ., stasfun) %>%
+#   dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
+# prop.table(table(df$X3.您的性别.)) # 比例
+# qqPlot(GSI_Tscore ~ X3.您的性别., data = df) # 正态性评估
+# ## 结果提示非正态性
+# wilcox.test(GSI_Tscore ~ X3.您的性别., data = df) # stats包函数
+# coin::wilcox_test(GSI_Tscore ~ factor(X3.您的性别.), data = df)
+# # W = 2631874, p-value < 2.2e-16
+# # 不同婚姻状况GSI T-scores比较
+# df$X5.您的婚姻状况. <- ifelse(df$X5.您的婚姻状况. == 2, df$X5.您的婚姻状况., 1) # 两分类
+# df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
+#   cast(., X5.您的婚姻状况. ~ ., stasfun) %>%
+#   dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
+# round(100*prop.table(table(df$X5.您的婚姻状况.)), 2)
+# coin::wilcox_test(GSI_Tscore ~ factor(X5.您的婚姻状况.), data = df)
+# wilcox.test(GSI_Tscore ~ X5.您的婚姻状况., data = df) # 两样本
+# kruskal.test(GSI_Tscore ~ X5.您的婚姻状况., data = df) # 多样本总体检验
+# # Kruskal-Wallis chi-squared = 3.8845, df = 3, p-value = 0.2742
+# wmc(GSI_Tscore ~ X5.您的婚姻状况., data = df, method = "holm") ##两两比较
+# # 不同受教育程度GSI T-scores比较
+# df$X6.您的受教育程度.[df$X6.您的受教育程度. == 1] <- 2 # 合并高中
+# df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
+#   cast(., X6.您的受教育程度. ~ ., stasfun) %>%
+#   dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
+# round(100*prop.table(table(df$X6.您的受教育程度.)), 2)
+# kruskal.test(GSI_Tscore ~ X6.您的受教育程度., data = df) 
+# # Kruskal-Wallis chi-squared = 13.73, df = 3, p-value = 0.003297
+# wmc(GSI_Tscore ~ X6.您的受教育程度., data = df, method = "holm")
+# # 不同工作年限GSI T-score比较
+# df$work.years <- cut(df$X8.您的工作年限.年..不满1年按1年算., 
+#                      breaks = c(0,5,10,20,60), right = F)
+# df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
+#   cast(., work.years ~ ., stasfun) %>%
+#   dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
+# round(100*prop.table(table(df$work.years)), 2)
+# kruskal.test(GSI_Tscore ~ work.years, data = df) 
+# # Kruskal-Wallis chi-squared = 16.373, df = 3, p-value =
+# #   0.0009508
+# wmc(GSI_Tscore ~ work.years, data = df, method = "holm") ##两两比较
+# # 不同COVID-19工作经历GSI T-score比较
+# df %>% melt(., measure.vars = c("GSI_Tscore")) %>%
+#   cast(., X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等. ~ ., stasfun) %>%
+#   dplyr::mutate(mean = round(mean, 2), sd = round(sd, 2), median = round(median, 2)) # 分组计算均数和标准差
+# round(100*prop.table(table(df$X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等.)), 2)
+# wilcox.test(GSI_Tscore ~ X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等., data = df)
+# coin::wilcox_test(GSI_Tscore ~ factor(X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等.), data = df)
 #高危发生影响因素分析（单因素）
 table(df$age.group, df$group) # 年龄组卡方检验
 addmargins(table(df$age.group, df$group))
@@ -271,30 +271,30 @@ addmargins(table(df$X9.您是否从事新冠肺炎疫情相关工作..如与确�
 round(100*prop.table(table(df$X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等., df$group), margin = 1), 2)
 coin::chisq_test(table(df$X9.您是否从事新冠肺炎疫情相关工作..如与确诊.疑似患者.密切接触者.隔离人员.流动人员排查相关工作等., df$group))
 # logistic回归多因素分析
-names(df)[c(10:13,15,16)] <- c("sex","age","marriage","education","occup.years","covid.exp")
-# df$covid.exp <- ifelse(df$covid.exp == 2, 0, df$covid.exp)
-df$covid.exp <- relevel(factor(df$covid.exp), ref = "2")
-df$sex <- relevel(factor(df$sex), ref = "1")
-# df$sex <- ifelse(df$sex == 1, df$sex, 0)
-# df$sex <- factor(df$sex, levels = c("1","0"), labels = c("男","女"))
-df$marriage <- factor(df$marriage)
-df$education <- factor(df$education)
-df$group <- factor(df$group)
-levels(df$age.group)
-df$age.group <- relevel(df$age.group, ref = "[50,100)")
-df$work.years <- cut(df$occup.years, breaks = c(0,5,10,20,60), right = F)
-levels(df$work.years)
-df$work.years <- relevel(df$work.years, ref = "[0,5)")
-## 看看age和occup.years相关性
-cor.test(df$age, df$occup.years, method = "spearman") # 结果提示有高度相关性
-fit1 <- glm(group ~ sex + age.group + marriage + education + covid.exp, 
-           data = df, family = binomial())
-summary(fit1)
-exp(coef(fit1))
-fit2 <- glm(group ~ sex + age.group + marriage + education + work.years + covid.exp, 
-            data = df, family = binomial())
-fit3 <- glm(group ~ sex + marriage + education  + covid.exp, 
-            data = df, family = binomial())
+# names(df)[c(10:13,15,16)] <- c("sex","age","marriage","education","occup.years","covid.exp")
+# # df$covid.exp <- ifelse(df$covid.exp == 2, 0, df$covid.exp)
+# df$covid.exp <- relevel(factor(df$covid.exp), ref = "2")
+# df$sex <- relevel(factor(df$sex), ref = "1")
+# # df$sex <- ifelse(df$sex == 1, df$sex, 0)
+# # df$sex <- factor(df$sex, levels = c("1","0"), labels = c("男","女"))
+# df$marriage <- factor(df$marriage)
+# df$education <- factor(df$education)
+# df$group <- factor(df$group)
+# levels(df$age.group)
+# df$age.group <- relevel(df$age.group, ref = "[50,100)")
+# df$work.years <- cut(df$occup.years, breaks = c(0,5,10,20,60), right = F)
+# levels(df$work.years)
+# df$work.years <- relevel(df$work.years, ref = "[0,5)")
+# ## 看看age和occup.years相关性
+# cor.test(df$age, df$occup.years, method = "spearman") # 结果提示有高度相关性
+# fit1 <- glm(group ~ sex + age.group + marriage + education + covid.exp, 
+#            data = df, family = binomial())
+# summary(fit1)
+# exp(coef(fit1))
+# fit2 <- glm(group ~ sex + age.group + marriage + education + work.years + covid.exp, 
+#             data = df, family = binomial())
+# fit3 <- glm(group ~ sex + marriage + education  + covid.exp, 
+#             data = df, family = binomial())
 ## logistic回归2 以阳性率为结局
 names(df)[c(10:13,15,16)] <- c("sex","age","marriage","education","occup.years","covid.exp")
 # df$covid.exp <- ifelse(df$covid.exp == 2, 0, df$covid.exp)
@@ -313,10 +313,31 @@ df$work.years <- relevel(df$work.years, ref = "[0,5)")
 cor.test(df$age, df$occup.years, method = "spearman") # 结果提示有高度相关性
 fit1 <- glm(res ~ sex + age.group + marriage + education + work.years + covid.exp, 
             data = df, family = binomial())
-fit2 <- step(fit1)
+round(cbind(summary(fit1)$coefficients, 
+      coef = exp(coef(fit1)), 
+      exp(confint(fit1))), 4)
+fit2 <- step(fit1) ## 去掉无意义的变量
 summary(fit2)
-exp(coef(fit1))
-anova(fit2, )
-library("relimp")
+round(cbind(coef = exp(coef(fit2)), exp(confint(fit2))), 4) ## 点估计及95%CI
+anova(fit2, test = "Chisq") ##relative importance analysis based on residual.deviance
+library(dominanceanalysis) 
+dapres<-dominanceAnalysis(fit2)
+averageContribution(dapres,fit.functions = "r2.m")
+## 年龄组和工作年限 重新分类 ###
+df$age.group2 <- ifelse(df$age < 50, 1, 0)
+df$work.years2 <- ifelse(df$occup.years >= 5, 1, 0)
+fit3 <- glm(res ~ sex + age.group2 + marriage + work.years2 + covid.exp, 
+            data = df, family = binomial())
+round(cbind(summary(fit3)$coefficients, 
+            coef = exp(coef(fit3)), 
+            exp(confint(fit3))), 4)
+dapres<-dominanceAnalysis(fit3)
+x <- averageContribution(dapres,fit.functions = "r2.m")
+round(sort(x$r2.m), 4)
+anova(fit3, test = "Chisq")
+dominanceMatrix(dapres, type="complete",fit.functions = "r2.m", ordered=TRUE)
+dominanceMatrix(dapres, type="conditional",fit.functions = "r2.m", ordered=TRUE)
+dominanceMatrix(dapres, type="general",fit.functions = "r2.m", ordered=TRUE)
+plot(dapres, which.graph ="general",fit.function = "r2.m")
 
 
