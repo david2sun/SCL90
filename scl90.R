@@ -338,6 +338,23 @@ anova(fit3, test = "Chisq")
 dominanceMatrix(dapres, type="complete",fit.functions = "r2.m", ordered=TRUE)
 dominanceMatrix(dapres, type="conditional",fit.functions = "r2.m", ordered=TRUE)
 dominanceMatrix(dapres, type="general",fit.functions = "r2.m", ordered=TRUE)
-plot(dapres, which.graph ="general",fit.function = "r2.m")
+plot(dapres, which.graph ="general",fit.function = "r2.m") 
+library(ggplot2)
+df.gg <- data.frame(name=c("女性", "年龄<50岁", "已婚", "工作年限≥5年" ,"新冠疫情工作经历"), value = x$r2.m)
+ggplot(data = df.gg, aes(x=reorder(name, value, dplyr::desc), y=value)) +
+      geom_bar(aes(x=reorder(name, value, dplyr::desc), y=value, fill=name), stat = "identity") + 
+      labs(x="变量", y=expression(bold(R[McFadden]^{'2'})), 
+           fill="变量"#, caption.title = "医务人员心理异常筛查阳性Logistic回归模型变量相对重要性") + 
+      ) +
+      geom_text(stat="identity",aes(label=round(value, 4)), 
+                  vjust = 0, family = "STKaiti") +
+      scale_fill_discrete(breaks=levels(reorder(df.gg$name, df.gg$value, dplyr::desc))) +
+  theme_bw(base_size = 12, base_family = "STKaiti") +
+  theme(#plot.caption  = element_text(hjust = 0.5, face = "bold", size = 14),
+            axis.text  =  element_text(face="bold", size = 11),
+            axis.title = element_text(face = "bold", size = 12)) 
+       
+  
+      
 
 
