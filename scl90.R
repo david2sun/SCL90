@@ -175,6 +175,7 @@ df %>% melt(., measure.vars = c("total_scores")) %>%
 # 方差分析
 library(car)
 qqPlot(GSI_Tscore ~ age.group, data = df) #正态性评估
+# qqPlot(lm(GSI_Tscore ~ age.group, data = df)) 方差分析的正态性假设检验
 library(nortest)
 lillie.test(df$GSI_Tscore)  # (Kolmogorov-Smirnov) normality test
 # 基于分组的正态性检验
@@ -315,9 +316,7 @@ fit1 <- glm(res ~ sex + age.group + marriage + education + work.years + covid.ex
 fit2 <- step(fit1)
 summary(fit2)
 exp(coef(fit1))
-anova(fit2)
+anova(fit2, )
 library("relimp")
-dsdsalfsfl
-###sunya
 
 
